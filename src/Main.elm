@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Html exposing (Html)
@@ -32,7 +32,7 @@ main =
     { init = init
     , view = view
     , update = update
-    , subscriptions = (\_ -> Sub.none)
+    , subscriptions = subscriptions
     }
 
 -- MODEL
@@ -44,7 +44,7 @@ init flags =
             ({ height = flags.height, width = flags.width, grid = grid }, Cmd.none)
 
         Err err ->
-            Debug.todo "Invalid JSON"
+            ({ height = 0, width = 0, grid = []}, Cmd.none)
 
 gridDecoder : Json.Decode.Decoder (List Cell)
 gridDecoder =
@@ -60,23 +60,25 @@ cellDecoder =
 -- UPDATE
 
 type Msg
-  = Redraw
+  = ReceivedDataFromJS Model -- Maybe Flags
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    Redraw  ->
-      ( model, Cmd.none )
+    ReceivedDataFromJS data ->
+      ( data, Cmd.none )
+
+port receiveData : (Model -> msg) -> Sub msg
 
 -- VIEW
 
 renderCell: Cell -> Svg msg
 renderCell cell =
     rect
-        [ x (String.fromInt (cell.x * 20))
-        , y (String.fromInt (cell.y * 20))
-        , width "20"
-        , height "20"
+        [ x (String.fromInt (cell.x * 10))
+        , y (String.fromInt (cell.y * 10))
+        , width "10"
+        , height "10"
         , fill cell.color
         ]
         []
@@ -90,3 +92,8 @@ view model =
     ]
     (List.map renderCell model.grid)
     
+-- SUBSRIPTIONS
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    receiveData ReceivedDataFromJS
