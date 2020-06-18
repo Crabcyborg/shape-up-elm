@@ -92,7 +92,7 @@ view model =
     ]
     (List.map renderCell model.grid)
     
--- SUBSRIPTIONS
+-- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
